@@ -3,7 +3,7 @@ from typing import Optional
 from pydantic import BaseModel
 from datetime import datetime
 from ..db import UserLogic
-from ..models import UserModels, Errors
+from ..models import UserResponseModel, UserCreationModel, UserException
 
 router = APIRouter(
     prefix='/users',
@@ -15,7 +15,7 @@ user_logic = None
 ## Obtains an instance of UserLogic, which is responsible for querying the
 ## database. This will call a method for obtaining the shared db connection.
 async def get_user_logic():
-    user_logic = UserLogic.UserLogic()
+    user_logic = UserLogic()
     return user_logic
 
 class User(BaseModel):
@@ -28,12 +28,12 @@ class User(BaseModel):
     enabled: bool
     creation_date: Optional[datetime] = None
 
-UserCreationModel = UserModels.UserCreationModel
+UserCreationModel = UserCreationModel
 
 # TODO: Needs auth
 @router.get(
     "/{user_id}",
-    response_model=UserModels.UserResponseModel,
+    response_model=UserResponseModel,
     summary="Get a single user by _id"
 )
 async def read_user(
@@ -54,7 +54,7 @@ async def create_user(
     try:
         user = await user_logic.create_user(user)
         return user
-    except Errors.UserException as user_exception:
+    except UserException as user_exception:
         raise HTTPException(status_code=409, detail=user_exception.message)
 
 # TODO: Needs auth
@@ -69,5 +69,5 @@ async def delete_user(
     try:
         result = await user_logic.delete_user_by_id(user_id)
         return result
-    except Errors.UserException as user_exception:
+    except UserException as user_exception:
         raise HTTPException(status_code=404, detail=user_exception.message)

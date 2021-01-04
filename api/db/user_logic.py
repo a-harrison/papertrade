@@ -2,7 +2,7 @@ from ..dependencies import DBHandler
 from fastapi import Depends
 from pydantic import BaseModel
 from datetime import datetime
-from ..models import Errors
+from ..models import UserException
 from base64 import b64encode
 from os import urandom
 import hashlib
@@ -60,10 +60,10 @@ class UserLogic:
         )
 
         if await UserLogic.get_user_by_username(self, username) is not None:
-            raise Errors.UserException("A user with this username already exists.")
+            raise UserException("A user with this username already exists.")
 
         elif await UserLogic.get_user_by_email(self, email) is not None:
-            raise Errors.UserException("A user with this email address already exists.")
+            raise UserException("A user with this email address already exists.")
 
         else:
             ## Create user
@@ -81,6 +81,6 @@ class UserLogic:
     async def delete_user_by_id(self, user_id: str):
         result = await self.db.users.delete_one({ "_id" : user_id })
         if result.deleted_count == 0:
-            raise Errors.UserException("User not found.")
+            raise UserException("User not found.")
         else:
             return 1
