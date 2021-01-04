@@ -28,8 +28,6 @@ class User(BaseModel):
     enabled: bool
     creation_date: Optional[datetime] = None
 
-UserCreationModel = UserCreationModel
-
 # TODO: Needs auth
 @router.get(
     "/{user_id}",
