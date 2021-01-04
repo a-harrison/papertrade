@@ -6,10 +6,6 @@ import os
 
 app = FastAPI()
 
-pymongo_client = None
-db = None
-user_logic = None
-
 async def get_db_handler():
     return await DBHandler.get_db_handler()
 
