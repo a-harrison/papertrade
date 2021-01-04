@@ -1,0 +1,11 @@
+## Ignore virtualenv directory and pycache
+venv
+__pycache__/
+
+## Ignore .envrc file
+## A template will be included
+.envrc
+
+# Ignore start / stop scripts
+start.sh
+test.py
