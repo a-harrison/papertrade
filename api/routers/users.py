@@ -2,7 +2,7 @@ from fastapi import Depends, APIRouter, HTTPException
 from typing import Optional
 from pydantic import BaseModel
 from datetime import datetime
-from ..bin import UserLogic
+from ..bin import UserLogic, AuthLogic
 from ..models import UserResponseModel, UserCreationModel, User, UserException
 
 router = APIRouter(
@@ -55,10 +55,3 @@ async def delete_user(
         return result
     except UserException as user_exception:
         raise HTTPException(status_code=404, detail=user_exception.message)
-# 
-# @router.get(
-#     '/me',
-#     summary="Get information about the user authenticated in the session."
-# )
-# async def read_users_me(current_user: User = Depends(get_current_user)):
-#     return current_user

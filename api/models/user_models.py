@@ -8,6 +8,7 @@ from datetime import datetime
 class UserCreationModel(BaseModel):
     username: str
     email: str
+    full_name: Optional[str] = None
     enabled: Optional[bool] = None
     client_hash: str        # Addition to UserBaseModel
 
@@ -16,14 +17,18 @@ class UserResponseModel(BaseModel):
     _id: str                # Addition to UserBaseModel
     username: str
     email: str
+    full_name: Optional[str] = None
     enabled: bool
     creation_date: datetime # Addition to UserBaseModel
 
 # Model representing all fields of the User class
-class User(UserResponseModel):
+class User(BaseModel):
     _id: str                # Addition to UserBaseModel
     username: str
     email: str
-    enabled: bool
-    creation_date: datetime # Addition to UserBaseModel
-    hashed_password: Optional[str] = None    # Addition to UserResponseModel
+    full_name: Optional[str] = None
+    enabled: Optional[bool] = False
+    creation_date: Optional[datetime] = None # Addition to UserBaseModel
+
+class UserInDB(User):
+    hashed_password: str
