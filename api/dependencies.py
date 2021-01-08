@@ -1,3 +1,4 @@
+from fastapi.security import OAuth2PasswordBearer
 import motor.motor_tornado
 import os
 
@@ -28,3 +29,6 @@ class DBHandler:
             return get_db_handler(tries+1)
         else:
             print("Handler not initialized. Number of tries exceeded. Exiting!")
+
+class AuthScheme:
+    oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")

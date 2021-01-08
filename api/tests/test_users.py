@@ -53,8 +53,7 @@ def populate_gettable_user(setup):
         "_id" : "100",
         "username" : "test",
         "email" : "test@test.com",
-        "hashed_password" : "dummyhashedpassword",
-        "salt" : "dummysalt",
+        "password_hash" : "dummyhashedpassword",
         "enabled" : True,
         "creation_date" : datetime.now()
     })
@@ -69,8 +68,7 @@ def populate_existing_username_user(setup):
         "_id" : "test_create_existing_username_user",
         "username": "test_existing_username",
         "email": "test_existing_username@testing.com",
-        "hashed_password" : "dummyhashedpassword",
-        "salt" : "dummysalt",
+        "password_hash" : "dummyhashedpassword",
         "enabled": True,
         "client_hash" : "abcdefgh123456789",
         "creation_date" : datetime.now()
@@ -86,8 +84,7 @@ def populate_existing_email_user(setup):
         "_id" : "test_create_existing_email_user",
         "username": "testing_existing_email",
         "email": "test_existing_email@testing.com",
-        "hashed_password" : "dummyhashedpassword",
-        "salt" : "dummysalt",
+        "password_hash" : "dummyhashedpassword",
         "enabled": True,
         "client_hash" : "abcdefgh123456789",
         "creation_date" : datetime.now()
@@ -103,8 +100,7 @@ def populate_removeable_user(setup):
         "_id" : "test_delete_user",
         "username" : "test-delete-user",
         "email" : "test-delete-user@testing.com",
-        "hashed_password" : "dummyhashedpassword",
-        "salt" : "dummysalt",
+        "password_hash" : "dummyhashedpassword",
         "enabled" : True,
         "creation_date" : datetime.now()
     })
@@ -123,13 +119,18 @@ def test_get_user(populate_gettable_user):
     assert response.status_code == 200
 
     response_body = response.json()
-    if response_body is None:
-        print("User not found.")
-        assert 0
-    else:
-        assert response_body['username'] == "test"
-        assert response_body['email'] == "test@test.com"
-        assert response_body['enabled'] == True
+    assert response_body['username'] == "test"
+    assert response_body['email'] == "test@test.com"
+    assert response_body['enabled'] == True
+
+def test_get_nonexistent_user(setup):
+    user_test_client = setup
+    response = user_test_client.test_client.get(
+        '/users/200'
+    )
+
+    assert response.status_code == 404
+    assert response.json() == { "detail" : "User not found." }
 
 def test_create_user(setup):
     user_test_client = setup
@@ -150,12 +151,11 @@ def test_create_user_wont_set_password_hash(setup):
     response = user_test_client.test_client.post(
         '/users/',
         json={
-            "username": "TESTING-test_set_hashed_password",
-            "email": "test_set_hashed_password@testing.com",
+            "username": "TESTING-test_set_password_hash",
+            "email": "test_set_password_hash@testing.com",
             "enabled": True,
             "client_hash" : "abcdefgh123456789",
-            "hashed_password" : "settinghashedpassword",
-            "salt": "settingsalt"
+            "password_hash" : "settinghashedpassword",
         }
     )
 
@@ -164,8 +164,7 @@ def test_create_user_wont_set_password_hash(setup):
 
     user = user_test_client.test_db.users.find_one({ "_id" : response.json() })
     assert user is not None
-    assert user['hashed_password'] is not "settinghashedpassword"
-    assert user['salt'] is not "settingsalt"
+    assert user['password_hash'] is not "settinghashedpassword"
 
 def test_create_user_with_username_conflict(populate_existing_username_user):
     user_test_client = populate_existing_username_user

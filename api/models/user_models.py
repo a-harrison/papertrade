@@ -2,17 +2,13 @@ from typing import Optional
 from pydantic import BaseModel
 from datetime import datetime
 
-# Base user class of fields that should be present in all forms of a user
-class UserBaseModel(BaseModel):
-    username: str
-    email: str
-    enabled: bool
-
 # Class representing required fields necessary to create a user
-class UserCreationModel(UserBaseModel):
+# We use a separate model from 'UserModel' to prevent the client from setting
+# the password hash or the salt, which must be created server-side
+class UserCreationModel(BaseModel):
     username: str
     email: str
-    enabled: bool
+    enabled: Optional[bool] = None
     client_hash: str        # Addition to UserBaseModel
 
 # Class representing only fields that should be returned when accessing a user
@@ -24,11 +20,10 @@ class UserResponseModel(BaseModel):
     creation_date: datetime # Addition to UserBaseModel
 
 # Model representing all fields of the User class
-class UserModel(UserResponseModel):
+class User(UserResponseModel):
     _id: str                # Addition to UserBaseModel
     username: str
     email: str
     enabled: bool
     creation_date: datetime # Addition to UserBaseModel
-    hashed_password: str    # Addition to UserResponseModel
-    password_salt: str      # Addition to UserResponseModel
+    hashed_password: Optional[str] = None    # Addition to UserResponseModel
