@@ -11,6 +11,7 @@ router = APIRouter(
 )
 
 # TODO: Needs auth
+# Only allow access by users with sufficient permissions
 @router.get(
     "/{user_id}",
     response_model=UserResponseModel,
@@ -42,6 +43,7 @@ async def create_user(
         raise HTTPException(status_code=409, detail=user_exception.message)
 
 # TODO: Needs auth
+## Only allow access by users with permission
 @router.delete(
     "/{user_id}",
     summary="Delete a single user by _id"
