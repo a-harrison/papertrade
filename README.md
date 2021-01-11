@@ -15,13 +15,24 @@ React or other framework.
 * Basic users endpoint created.
 * Dummy JSON Web Token authentication implemented referencing a dummy DB object
 * Basic testing implemented for endpoints that exist.
-* More robust authentication incoming. 
+* More robust authentication incoming.
 
 #### Install
 
 ```
 pip install -r requirements.txt
 ```
+
+Required config variables:
+
+* `MONGODB_URI` - URI to connect to MongoDB database.
+* `AUTH_SECRET_KEY` - Secret key used to sign JSON Web Token
+* `AUTH_ALGORITHM` - Algorithm used when signing JSON Web Token
+* `AUTH_ACCESS_TOKEN_EXPIRE_MINUTES` - Expiration time for web tokens
+
+Testing config variables:
+
+* `TEST_MONGODB_URI` - MongoDB URI to use when running tests.
 
 #### Start
 
