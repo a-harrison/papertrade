@@ -16,16 +16,6 @@ class AuthLogic:
     AUTH_ALGORITHM = os.environ['AUTH_ALGORITHM']
     AUTH_ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ['AUTH_ACCESS_TOKEN_EXPIRE_MINUTES'])
 
-    fake_users_db = {
-        "johndoe": {
-            "username": "johndoe",
-            "full_name": "John Doe",
-            "email": "johndoe@example.com",
-            "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
-            "enabled": True,
-        }
-    }
-
     # def get_user(username: str, user_logic: UserLogic = Depends(UserLogic), ):
     #     return user_logic.get_user_by_username(username)
     #
@@ -37,6 +27,24 @@ class AuthLogic:
     #         return False
     #     return user
 
+    fake_users_db = {
+        "johndoe": {
+            "username": "johndoe",
+            "full_name": "John Doe",
+            "email": "johndoe@example.com",
+            "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
+            "enabled": True,
+        },
+        "janedoe": {
+            "username": "janedoe",
+            "full_name": "Jane Doe",
+            "email": "janedoe@example.com",
+            "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
+            "enabled": False,
+        }
+    }
+
+    ## Gets the user from the database
     def get_user(db, username: str):
         if username in db:
             user_dict = db[username]
@@ -44,7 +52,21 @@ class AuthLogic:
             ## This needs to be UserInDB
             return UserInDB(**user_dict)
 
-    async def get_current_user(token: str = Depends(oauth2_scheme)):
+    ## Validates that username and password correspond to a valid user
+    ## Returns user on success, errors otherwise
+    def authenticate_user(db, username: str, password: str):
+        user = AuthLogic.get_user(db, username)
+
+        if not user:
+            return False
+        if not user.enabled:
+            raise HTTPException(status_code=400, detail="Inactive user")
+        if not CryptoLogic.verify_password(password, user.hashed_password):
+            return False
+        return user
+
+    ## Returns the user specified in the Bearer Token
+    async def get_current_user_from_bearer_token(token: str = Depends(oauth2_scheme)):
         credentials_exception = HTTPException(
             status_code = status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
@@ -74,19 +96,12 @@ class AuthLogic:
             )
         return user
 
-    async def get_current_active_user(current_user: User = Depends(get_current_user)):
-        print("Test")
+    ## Returns the active user authenticated in the session. A disabled
+    ## user will return a 400 error
+    async def get_current_active_user_from_bearer_token(current_user: User = Depends(get_current_user_from_bearer_token)):
         if not current_user.enabled:
             raise HTTPException(status_code=400, detail="Inactive user")
         return current_user
-
-    def authenticate_user(db, username: str, password: str):
-        user = AuthLogic.get_user(db, username)
-        if not user:
-            return False
-        if not CryptoLogic.verify_password(password, user.hashed_password):
-            return False
-        return user
 
     def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
         to_encode = data.copy()
