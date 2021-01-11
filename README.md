@@ -45,3 +45,7 @@ uvicorn api.main:app --reload
 ```
 pytest
 ```
+
+#### Documentation
+
+Endpoint documentation is available at `127.0.0.1:8000/docs` after starting the API.
