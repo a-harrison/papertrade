@@ -53,7 +53,7 @@ def populate_gettable_user(setup):
         "_id" : "100",
         "username" : "test",
         "email" : "test@test.com",
-        "password_hash" : "dummyhashedpassword",
+        "password_hash" : "$2b$12$.IWgqTmhx0qtw6oB/JTdGeephe7xaWMNeE.WEoxiMQiW5KbnfmsE2",
         "enabled" : True,
         "creation_date" : datetime.now()
     })

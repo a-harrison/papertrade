@@ -8,4 +8,5 @@ class CryptoLogic:
         return CryptoLogic.pwd_context.verify(client_hash, password_hash)
 
     def get_password_hash(client_hash):
+        print("Hash: " + CryptoLogic.pwd_context.hash(client_hash))
         return CryptoLogic.pwd_context.hash(client_hash)

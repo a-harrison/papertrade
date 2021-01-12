@@ -31,4 +31,4 @@ class User(BaseModel):
     creation_date: Optional[datetime] = None # Addition to UserBaseModel
 
 class UserInDB(User):
-    hashed_password: str
+    password_hash: str

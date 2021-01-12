@@ -1,6 +1,6 @@
 from fastapi import Depends, FastAPI, HTTPException, status
 from .routers import me, token, users
-from .dependencies import DBHandlerInitializer, DBHandler, AuthScheme
+from .dependencies import DBHandler, AuthScheme
 import os
 
 app = FastAPI()
@@ -24,7 +24,7 @@ def startup_event():
 
         # Client connections are shared across object instances
         # so creating it here will allow other objects to access the connection
-        db_handler_initiazer = DBHandlerInitializer(os.environ['MONGODB_URI'])
+        # db_handler_initiazer = DBHandlerInitializer(os.environ['MONGODB_URI'])
 
 @app.on_event("shutdown")
 def shutdown_event():

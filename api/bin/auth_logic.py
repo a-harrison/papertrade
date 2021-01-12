@@ -1,4 +1,3 @@
-from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from datetime import datetime, timedelta
 from typing import Optional
@@ -16,52 +15,18 @@ class AuthLogic:
     AUTH_ALGORITHM = os.environ['AUTH_ALGORITHM']
     AUTH_ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ['AUTH_ACCESS_TOKEN_EXPIRE_MINUTES'])
 
-    # def get_user(username: str, user_logic: UserLogic = Depends(UserLogic), ):
-    #     return user_logic.get_user_by_username(username)
-    #
-    # def authenticate_user(username: str, client_hash: str, user_logic: UserLogic = Depends(UserLogic)):
-    #     user = get_user(user_logic, username)
-    #     if not user:
-    #         return False
-    #     if not verify_password(client_hash, user.password_hash):
-    #         return False
-    #     return user
+    async def get_user(user_logic: UserLogic, username: str):
+        return await user_logic.get_user_by_username(username)
 
-    fake_users_db = {
-        "johndoe": {
-            "username": "johndoe",
-            "full_name": "John Doe",
-            "email": "johndoe@example.com",
-            "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
-            "enabled": True,
-        },
-        "janedoe": {
-            "username": "janedoe",
-            "full_name": "Jane Doe",
-            "email": "janedoe@example.com",
-            "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
-            "enabled": False,
-        }
-    }
-
-    ## Gets the user from the database
-    def get_user(db, username: str):
-        if username in db:
-            user_dict = db[username]
-
-            ## This needs to be UserInDB
-            return UserInDB(**user_dict)
-
-    ## Validates that username and password correspond to a valid user
-    ## Returns user on success, errors otherwise
-    def authenticate_user(db, username: str, password: str):
-        user = AuthLogic.get_user(db, username)
+    async def authenticate_user(user_logic: UserLogic, username: str, password: str):
+        user = await AuthLogic.get_user(user_logic, username)
+        print(user)
 
         if not user:
             return False
-        if not user.enabled:
+        if not user['enabled']:
             raise HTTPException(status_code=400, detail="Inactive user")
-        if not CryptoLogic.verify_password(password, user.hashed_password):
+        if not CryptoLogic.verify_password(password, user['password_hash']):
             return False
         return user
 
@@ -83,7 +48,7 @@ class AuthLogic:
         except JWTError:
             raise credentials_exception
 
-        user = AuthLogic.get_user(AuthLogic.fake_users_db, username=token_data.username)
+        user = AuthLogic.get_user(user_logic, username=token_data.username)
         if user is None:
             raise credentials_exception
         return user
@@ -104,7 +69,7 @@ class AuthLogic:
         return current_user
 
     ## Creates access token with specified expiration time
-    def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    async def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.utcnow() + expires_delta

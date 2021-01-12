@@ -17,14 +17,6 @@ class UserLogic:
         user = await self.db.users.find_one({ "_id" : user_id })
         return user
 
-    async def get_active_user_by_id(self, user_id: str):
-        user = await UserLogic.get_user_by_id(self, user_id)
-
-        if user.enabled == False:
-            return None
-        else:
-            return user
-
     async def get_user_by_username(self, username: str):
         user = await self.db.users.find_one({ "username" : username })
         return user
