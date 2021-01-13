@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 from pymongo import MongoClient
-from jose import JWTError, jwt
+from jose import jwt
 from ..main import app
 from datetime import datetime
 import pytest

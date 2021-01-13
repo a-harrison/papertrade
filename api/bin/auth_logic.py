@@ -31,7 +31,7 @@ class AuthLogic:
         return user
 
     ## Returns the user specified in the Bearer Token
-    async def get_current_user_from_bearer_token(token: str = Depends(oauth2_scheme)):
+    async def get_current_user_from_bearer_token(token: str = Depends(oauth2_scheme), user_logic: UserLogic = Depends()):
         credentials_exception = HTTPException(
             status_code = status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
@@ -48,7 +48,7 @@ class AuthLogic:
         except JWTError:
             raise credentials_exception
 
-        user = AuthLogic.get_user(user_logic, username=token_data.username)
+        user = await AuthLogic.get_user(user_logic, username=token_data.username)
         if user is None:
             raise credentials_exception
         return user
@@ -64,7 +64,7 @@ class AuthLogic:
     ## Returns the active user authenticated in the session. A disabled
     ## user will return a 400 error
     async def get_current_active_user_from_bearer_token(current_user: User = Depends(get_current_user_from_bearer_token)):
-        if not current_user.enabled:
+        if not current_user['enabled']:
             raise HTTPException(status_code=400, detail="Inactive user")
         return current_user
 
