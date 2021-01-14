@@ -1,17 +1,15 @@
-from fastapi.testclient import TestClient
-from ..main import app
 import pytest
+from httpx import AsyncClient
+from ..main import app
 
-client = TestClient(app)
+@pytest.fixture()
+async def setup_async_client(scope="session"):
+    async with AsyncClient(app=app, base_url="http://test") as ac:
+        yield ac
 
-@pytest.fixture(scope="module")
-def setup():
-    print("This should be called once.")
-    client = TestClient(app)
-    return client
-
-def test_read_main(setup):
-    client = setup
-    response = client.get("/")
+@pytest.mark.asyncio
+async def test_read_main(setup_async_client):
+    ac = setup_async_client
+    response = await ac.get("/")
     assert response.status_code == 200
     assert response.json() == {"message" : "Hello World"}
